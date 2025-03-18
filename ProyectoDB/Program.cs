@@ -16,7 +16,7 @@ namespace ProyectoDB
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Venta());
+            Application.Run(new Menu());
         }
     }
 }

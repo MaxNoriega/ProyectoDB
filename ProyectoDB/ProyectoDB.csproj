@@ -161,6 +161,36 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseHelper.cs" />
+    <Compile Include="Efectivo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Efectivo.Designer.cs">
+      <DependentUpon>Efectivo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Menu.Designer.cs">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MetodoPagoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MetodoPagoForm.Designer.cs">
+      <DependentUpon>MetodoPagoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProductosForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProductosForm.Designer.cs">
+      <DependentUpon>ProductosForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TransferenciaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TransferenciaForm.Designer.cs">
+      <DependentUpon>TransferenciaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Venta.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -169,6 +199,21 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Efectivo.resx">
+      <DependentUpon>Efectivo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Menu.resx">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MetodoPagoForm.resx">
+      <DependentUpon>MetodoPagoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProductosForm.resx">
+      <DependentUpon>ProductosForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TransferenciaForm.resx">
+      <DependentUpon>TransferenciaForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Venta.resx">
       <DependentUpon>Venta.cs</DependentUpon>
     </EmbeddedResource>

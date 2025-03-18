@@ -14,7 +14,7 @@ namespace ProyectoDB
             InitializeComponent();
             ListaProductos.KeyDown += ListaProductos_KeyDown;
             txtBuscarProdVenta.KeyDown += txtBuscarProdVenta_KeyDown;
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
         }
 
 
@@ -34,12 +34,13 @@ namespace ProyectoDB
         {
             if (e.KeyCode == Keys.Enter)
             {
-                e.Handled = true;  // ✅ Bloquea que el evento se vuelva a ejecutar
-                e.SuppressKeyPress = true;  // ✅ Evita que la tecla se registre dos veces
+                e.Handled = true;
+                e.SuppressKeyPress = true;
 
                 string idProducto = txtBuscarProdVenta.Text.Trim();
 
              
+
 
                 try
                 {
@@ -57,9 +58,9 @@ namespace ProyectoDB
         {
             // Consulta SQL para obtener el producto desde la base de datos
             string query = "SELECT Id_Producto, Nombre, Precio, Stock FROM Producto WHERE Id_Producto = @IdProducto";
-            SqlParameter[] parameters = { new SqlParameter("@IdProducto", idProducto) };
+            SqlParameter[] selectParameters = { new SqlParameter("@IdProducto", idProducto) };
 
-            DataTable dtProducto = dbHelper.ExecuteQueryWithParameters(query, parameters);
+            DataTable dtProducto = dbHelper.ExecuteQueryWithParameters(query, selectParameters);
 
             if (dtProducto.Rows.Count > 0)
             {
@@ -71,23 +72,20 @@ namespace ProyectoDB
 
                 if (stock > 0)
                 {
-                    decimal puntosGenerados = precio / 10; // ✅ Calcula los puntos generados
-
-          
+                    decimal puntosGenerados = precio / 10; //  Calcula los puntos generados
 
                     // 🔹 Agregar el producto al DataGridView con solo los datos requeridos
-                    ListaProductos.Rows.Add(id,nombre, precio, puntosGenerados);
-                    // ✅ Actualizar el stock en la base de datos restando 1
-                    MessageBox.Show($"Reduciendo stock del producto con ID: {idProducto}", "Depuración", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ListaProductos.Rows.Add(id, nombre, precio, puntosGenerados);
 
-                    string updateQuery = $"UPDATE Producto SET Stock = Stock - 1 WHERE Id_Producto = @{id}";
-                    dbHelper.ExecuteNonQueryWithParameters(updateQuery, parameters);
+                    // Crear un nuevo array de parámetros para la consulta UPDATE
+                    SqlParameter[] updateParameters = { new SqlParameter("@IdProducto", idProducto) };
+                    string updateQuery = "UPDATE Producto SET Stock = Stock - 1 WHERE Id_Producto = @IdProducto";
+                    dbHelper.ExecuteNonQueryWithParameters(updateQuery, updateParameters);
 
-                    // 🔍 Verifica si la consulta se ejecutó
-                    MessageBox.Show("Stock reducido en la base de datos", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+              
 
-                    ActualizarTotales(); // ✅ Recalcula los totales
-                    txtBuscarProdVenta.Clear(); // ✅ Limpia el TextBox después de agregar el producto
+                    ActualizarTotales(); //  Recalcula los totales
+                    txtBuscarProdVenta.Clear(); //  Limpia el TextBox después de agregar el producto
                 }
                 else
                 {
@@ -129,51 +127,29 @@ namespace ProyectoDB
 
 
         //Eliminar Producto de la lista
-        private async void ListaProductos_KeyDown(object sender, KeyEventArgs e)
+        private void ListaProductos_KeyDown(object sender, KeyEventArgs e)
         {
-            // Verifica si se presionó la tecla Suprimir (Delete)
-            if (e.KeyCode == Keys.Delete)
+            // Verifica si se presionó la tecla "Delete" o "Backspace"
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
             {
-                // Verifica si se seleccionó alguna fila
+                // Verifica si hay una fila seleccionada
                 if (ListaProductos.SelectedRows.Count > 0)
                 {
-                    string idProducto = ListaProductos.SelectedRows[0].Cells[0].Value.ToString(); // Columna 0 = IdProducto
-                    string nombreProducto = ListaProductos.SelectedRows[0].Cells["Nombre_Producto_Venta"].Value.ToString();
+                    // Obtiene el ID y nombre del producto de la fila seleccionada
+                    string idProducto = ListaProductos.SelectedRows[0].Cells[0].Value.ToString(); // Columna 0 = ID
 
-                    // Pregunta al usuario si está seguro de eliminar el producto
-                    var confirmResult = MessageBox.Show($"¿Estás seguro de eliminar el producto '{nombreProducto}'?",
-                        "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    //  Elimina la fila del DataGridView
+                    ListaProductos.Rows.RemoveAt(ListaProductos.SelectedRows[0].Index);
 
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // Elimina la fila del DataGridView
-                        ListaProductos.Rows.RemoveAt(ListaProductos.SelectedRows[0].Index);
+                    //  Reponer stock en la base de datos
+                    string updateQuery = "UPDATE Producto SET Stock = Stock + 1 WHERE Id_Producto = @IdProducto";
+                    SqlParameter[] parameters = { new SqlParameter("@IdProducto", idProducto) };
 
-                        // Recupera el producto desde la API por su nombre
+                    dbHelper.ExecuteNonQueryWithParameters(updateQuery, parameters);
 
-                        //var producto = await ObtenerProductoPorNombreAsync(nombreProducto);
-
-                        //if (producto != null)
-                        //{
-                        //    // Restaura el stock en la API
-                        //    producto.Stock += 1;
-                        //    bool actualizado = await ActualizarProductoAsync(producto);
-
-                        //    // Actualizar los totales después de la eliminación
-                        //    ActualizarTotales();
-
-                        //    //if (actualizado)
-                        //    //{
-                        //    //    MessageBox.Show("Producto eliminado y stock actualizado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        //    //}
-                        //    //else
-                        //    //{
-                        //    //    MessageBox.Show("No se pudo actualizar el stock en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //    //}
-                        //}
-                    }
+                    //  Actualiza los totales después de eliminar el producto
+                    ActualizarTotales();
                 }
-
             }
         }
 
@@ -187,72 +163,88 @@ namespace ProyectoDB
 
 
 
+
+
         //PAGAR
-        //private void PagarBtn_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        // Datos básicos de la venta
-        //        int idCliente = int.Parse(txtNumCtrlVenta.Text);
-        //        float totalVenta = float.Parse(txtCostoTotal.Text);
-        //        int puntosGen = ConvertirPuntosGenerados(txtPtosGenerados.Text);
-        //        // Generar un identificador único para la venta
-        //        var idVenta = Guid.NewGuid().GetHashCode(); // Genera un ID numérico único
-        //        //PrepararProductosVenta();
-        //        // Prepara los datos de la venta para TransferenciaForm
-        //        var metodoPagoForm = new MetodoPagoForm
-        //        {
-        //            IDVenta = idVenta,
-        //            IdCliente = idCliente,          // Pasa el IdCliente al formulario
-        //            TotalVenta = totalVenta,       // Crea una nueva propiedad para recibir TotalVenta
-        //            ProductosVenta = DatosVenta.ListaProdTicket, // Envía los productos
-        //            PuntosGenerados = puntosGen   // Nueva propiedad para recibir los puntos generados
-        //        };
-        //        metodoPagoForm.Show();
+        private void PagarBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Verifica si hay productos en la lista antes de continuar
+                if (ListaProductos.Rows.Count == 0)
+                {
+                    MessageBox.Show("No hay productos en la venta.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Verificar y convertir el ID del Cliente
+                if (!int.TryParse(txtNumCtrlVenta.Text, out int idCliente))
+                {
+                    MessageBox.Show("ID de cliente inválido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Verificar y convertir el total de la venta
+                if (!float.TryParse(txtCostoTotal.Text, out float totalVenta))
+                {
+                    MessageBox.Show("Total de venta inválido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Convertir los puntos generados de forma segura
+                int puntosGen = ConvertirPuntosGenerados(txtPtosGenerados.Text);
+
+                // Generar un identificador único para la venta (Siempre positivo)
+                int idVenta = Math.Abs(Guid.NewGuid().GetHashCode());
+
+                // Preparar los datos de la venta para TransferenciaForm
+                var metodoPagoForm = new MetodoPagoForm
+                {
+                    IDVenta = idVenta,
+                    IdCliente = idCliente,          // Pasa el IdCliente al formulario
+                    TotalVenta = totalVenta,       // Pasa el total de la venta
+                    ProductosVenta = DatosVenta.ListaProdTicket, // Envía los productos
+                    PuntosGenerados = puntosGen   // Envía los puntos generados
+                };
+
+                metodoPagoForm.Show(); // Abre la ventana de método de pago
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al procesar la venta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
 
 
+        private int ConvertirPuntosGenerados(string puntosGeneradosText)
+        {
+            try
+            {
+                if (!float.TryParse(puntosGeneradosText, out float puntosGenerados))
+                {
+                    MessageBox.Show("El valor de los puntos generados no es válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return 0;
+                }
+                return Convert.ToInt32(Math.Round(puntosGenerados)); // Redondea al entero más cercano
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al convertir los puntos generados: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+        }
 
+        private void BackBtn_Click(object sender, EventArgs e)
+        {
+            Menu menuForm = new Menu();
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Error al procesar la venta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //}
+            // Mostrar el formulario Menú
+            menuForm.Show();
 
-
-        //private int ConvertirPuntosGenerados(string puntosGeneradosText)
-        //{
-        //    try
-        //    {
-        //        // Intentar convertir a float y redondear
-        //        float puntosGenerados = float.Parse(puntosGeneradosText);
-        //        return Convert.ToInt32(Math.Round(puntosGenerados));
-        //    }
-        //    catch (FormatException)
-        //    {
-        //        // Manejo de error si el formato no es válido
-        //        MessageBox.Show("El valor de los puntos generados no es válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        return 0; // Retorna 0 en caso de error
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Manejo de otros errores
-        //        MessageBox.Show($"Error al convertir los puntos generados: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        return 0; // Retorna 0 en caso de error
-        //    }
-        //}
-        //private void BackBtn_Click(object sender, EventArgs e)
-        //{
-        //    Menu menuForm = new Menu();
-
-        //    // Mostrar el formulario Menú
-        //    menuForm.Show();
-
-        //    // Ocultar el formulario actual
-        //    this.Hide();
-        //}
+            // Ocultar el formulario actual
+            this.Hide();
+        }
     }
     public class Producto
     {

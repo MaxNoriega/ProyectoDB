@@ -53,7 +53,10 @@ public class DatabaseHelper
                 connection.Open();
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
+                    // Limpiar parámetros antes de agregar nuevos
+                    command.Parameters.Clear();
                     command.Parameters.AddRange(parameters);
+
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         dataTable.Load(reader);
@@ -81,19 +84,9 @@ public class DatabaseHelper
                 connection.Open();
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
+                    command.Parameters.Clear(); // Limpiar parámetros antes de agregar nuevos
                     command.Parameters.AddRange(parameters);
                     int rowsAffected = command.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        MessageBox.Show($"Stock actualizado correctamente. Filas afectadas: {rowsAffected}",
-                            "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("⚠ No se actualizó ninguna fila. Verifica si el ID existe en la base de datos.",
-                            "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
                 }
             }
         }
