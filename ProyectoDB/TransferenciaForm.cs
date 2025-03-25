@@ -250,23 +250,7 @@ namespace ProyectoDB
                
 
                 // Registrar el pago en la tabla Pago
-                string insertPagoQuery = @"
-            INSERT INTO Pago (ID_VENTA, TIPO_PAGO, MONTO_TOTAL, ID_CUENTA_ORIGEN, ID_CUENTA_DESTINO)
-            VALUES (@ID_VENTA, @TIPO_PAGO, @MONTO_TOTAL, @ID_CUENTA_ORIGEN, @ID_CUENTA_DESTINO)";
-
-                int idCuentaOrigen = ObtenerIdCuenta(cuentaOrigen);
-                int idCuentaDestino = ObtenerIdCuenta(cuentaDestino);
-
-                SqlParameter[] pagoParameters = {
-            new SqlParameter("@ID_VENTA", idVenta),
-            new SqlParameter("@TIPO_PAGO", "Transferencia"),
-            new SqlParameter("@MONTO_TOTAL", totalVenta),
-            new SqlParameter("@ID_CUENTA_ORIGEN", idCuentaOrigen),
-            new SqlParameter("@ID_CUENTA_DESTINO", idCuentaDestino)
-        };
-
-                // Ejecutar la inserción del pago
-                dbHelper.ExecuteNonQueryWithParameters(insertPagoQuery, pagoParameters);
+              
 
                 // Actualizar los puntos del cliente (misma lógica que en el pago en efectivo)
                 if (puntosUsados > 0)
