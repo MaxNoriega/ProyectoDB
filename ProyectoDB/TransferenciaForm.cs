@@ -22,7 +22,7 @@ namespace ProyectoDB
         public TransferenciaForm()
         {
             InitializeComponent();
-            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
             this.Load += TransferenciaForm_Load; // Suscripción al evento Load
                                                  // Suscribir el evento KeyDown al TextBox PtsUsartxt
             PtsUsartxt.KeyDown += PtsUsartxt_KeyDown;
@@ -156,7 +156,7 @@ namespace ProyectoDB
 
 
 
-        private async void BtnPagarTransferencia_Click(object sender, EventArgs e)
+        private void BtnPagarTransferencia_Click(object sender, EventArgs e)
         {
             try
             {

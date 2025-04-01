@@ -18,7 +18,7 @@ namespace ProyectoDB
         public ListaProductosForm()
         {
             
-            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
             InitializeComponent();
             CargarProductos();
 
@@ -50,6 +50,33 @@ namespace ProyectoDB
                 MessageBox.Show("Error al cargar los productos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void ActualizarProducto(Producto producto)  
+        {
+            try
+            {
+                string query = @"UPDATE Producto SET 
+                        Nombre = @Nombre, 
+                        Precio = @Precio, 
+                        Stock = @Stock, 
+                        Descripcion = @Descripcion
+                        WHERE Id_Producto = @Id_Producto";
+
+                SqlParameter[] parameters = {
+            new SqlParameter("@Id_Producto", producto.IdProducto),
+            new SqlParameter("@Nombre", producto.Nombre),
+            new SqlParameter("@Precio", producto.Precio),
+            new SqlParameter("@Stock", producto.Stock),
+            new SqlParameter("@Descripcion", producto.Descripcion)
+        };
+
+                dbHelper.ExecuteNonQueryWithParameters(query, parameters);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al actualizar producto: {ex.Message}", "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void AgregarBtn_Click(object sender, EventArgs e)
         {
             ProductosForm AgregarProducto = new ProductosForm();
@@ -76,65 +103,66 @@ namespace ProyectoDB
 
         private void ListaProductos_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0) // Asegurarse de que no es el encabezado
+            if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = ListaProductos.Rows[e.RowIndex];
-
-                // Crear objeto Producto con los datos de la fila
                 Producto productoSeleccionado = new Producto
                 {
-                    IdProducto =row.Cells["Id_Producto"].Value.ToString(),
-                    Nombre = row.Cells["Nombre"].Value.ToString(),
-                    Precio = Convert.ToDecimal(row.Cells["Precio"].Value),
-                    Stock = Convert.ToInt32(row.Cells["Stock"].Value),
-                    Descripcion = row.Cells["Descripcion"].Value?.ToString() ?? ""
+                    IdProducto = row.Cells[0].Value.ToString(),   // Primera columna
+                    Nombre = row.Cells[1].Value.ToString(),
+                    Precio = Convert.ToDecimal(row.Cells[2].Value),
+                    Stock = Convert.ToInt32(row.Cells[3].Value),
+                    Descripcion = row.Cells[4].Value?.ToString() ?? ""
                 };
 
-                // Abrir formulario de edición
-                using (var editarForm = new Moidifcar_Producto(productoSeleccionado))
+                Moidifcar_Producto formModificar = new Moidifcar_Producto(productoSeleccionado);
+                if (formModificar.ShowDialog() == DialogResult.OK)
                 {
-                    if (editarForm.ShowDialog() == DialogResult.OK)
-                    {
-                        // Actualizar el producto en la base de datos
-                        ActualizarProducto(editarForm.ProductoActual);
-                    }
+                    ActualizarProducto(productoSeleccionado);
+                    CargarProductos(); // Recargar la lista
                 }
-
-
             }
         }
-        private void ActualizarProducto(Producto producto)
+
+        private void Eliminarbtn_Click(object sender, EventArgs e)
         {
-            try
+            if (ListaProductos.SelectedRows.Count > 0) // Asegura que hay una fila seleccionada
             {
-                string query = @"UPDATE Producto SET 
-                        Nombre = @Nombre, 
-                        Precio = @Precio, 
-                        Stock = @Stock, 
-                        Descripcion = @Descripcion
-                        WHERE Id_Producto = @Id_Producto";
+                // 🔹 Obtener el ID del producto como INT
+                int idProducto = Convert.ToInt32(ListaProductos.SelectedRows[0].Cells[0].Value);
 
-                SqlParameter[] parameters = {
-            new SqlParameter("@Id_Producto", producto.IdProducto),
-            new SqlParameter("@Nombre", producto.Nombre),
-            new SqlParameter("@Precio", producto.Precio),
-            new SqlParameter("@Stock", producto.Stock),
-            new SqlParameter("@Descripcion", producto.Descripcion)
-        };
+                // 🔹 Confirmar con el usuario
+                DialogResult resultado = MessageBox.Show("¿Estás seguro de que deseas eliminar este producto?",
+                                                         "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
-                int rowsAffected = dbHelper.ExecuteNonQuery(query, parameters);
-
-                if (rowsAffected > 0)
+                if (resultado == DialogResult.Yes)
                 {
-                    MessageBox.Show("Producto actualizado correctamente", "Éxito",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadProductData(); // Refrescar el DataGridView
+                    // 🔹 Eliminar de la base de datos
+                    EliminarProducto(idProducto);
+
+                    // 🔹 Eliminar del DataGridView
+                    ListaProductos.Rows.Remove(ListaProductos.SelectedRows[0]);
+
+                    MessageBox.Show("Producto eliminado correctamente.");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Error al actualizar producto: {ex.Message}", "Error",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Selecciona un producto para eliminar.");
+            }
+        }
+        private void EliminarProducto(int idProducto)
+        {
+            using (SqlConnection conexion = new SqlConnection("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True"))
+            {
+                conexion.Open();
+                string query = "DELETE FROM Producto WHERE Id_Producto = @Id";
+
+                using (SqlCommand comando = new SqlCommand(query, conexion))
+                {
+                    comando.Parameters.AddWithValue("@Id", idProducto);
+                    comando.ExecuteNonQuery();
+                }
             }
         }
     }

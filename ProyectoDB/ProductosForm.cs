@@ -11,9 +11,9 @@ namespace ProyectoDB
         public ProductosForm()
         {
             InitializeComponent();
-            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
         }
-        private async void AddProductBtn_Click(object sender, EventArgs e)
+        private void AddProductBtn_Click(object sender, EventArgs e)
         {
             // Obtener los valores de los campos
             string idProducto = txtIDproducto.Text.Trim();
