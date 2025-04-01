@@ -32,12 +32,21 @@ namespace ProyectoDB
         private void ProductosBtn_Click(object sender, EventArgs e)
         {
             // Crear una instancia del formulario Menú
-            ProductosForm productosForm = new ProductosForm();
+            ListaProductosForm ListaproductosForm = new ListaProductosForm();
 
             // Mostrar el formulario Menú
-            productosForm.Show();
+            ListaproductosForm.Show();
 
             // Ocultar el formulario actual
+            this.Hide();
+        }
+
+        private void AlumnosBtn_Click(object sender, EventArgs e)
+        {
+            ListaUsuariosForm ListaAlumnosForm = new ListaUsuariosForm();
+
+            ListaAlumnosForm.Show();
+
             this.Hide();
         }
     }

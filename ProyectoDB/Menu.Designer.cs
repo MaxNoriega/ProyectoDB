@@ -34,6 +34,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.ProductosBtn = new System.Windows.Forms.Button();
             this.VentasBtn = new System.Windows.Forms.Button();
+            this.AlumnosBtn = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,19 +74,20 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Lavender;
+            this.panel1.Controls.Add(this.AlumnosBtn);
             this.panel1.Controls.Add(this.ProductosBtn);
             this.panel1.Controls.Add(this.VentasBtn);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Location = new System.Drawing.Point(944, 166);
+            this.panel1.Location = new System.Drawing.Point(944, 112);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(521, 535);
+            this.panel1.Size = new System.Drawing.Size(521, 676);
             this.panel1.TabIndex = 3;
             // 
             // ProductosBtn
             // 
             this.ProductosBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.ProductosBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 30F);
-            this.ProductosBtn.Location = new System.Drawing.Point(61, 351);
+            this.ProductosBtn.Location = new System.Drawing.Point(61, 341);
             this.ProductosBtn.Name = "ProductosBtn";
             this.ProductosBtn.Size = new System.Drawing.Size(413, 116);
             this.ProductosBtn.TabIndex = 4;
@@ -104,6 +106,18 @@
             this.VentasBtn.Text = "Ventas";
             this.VentasBtn.UseVisualStyleBackColor = true;
             this.VentasBtn.Click += new System.EventHandler(this.VentasBtn_Click);
+            // 
+            // AlumnosBtn
+            // 
+            this.AlumnosBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.AlumnosBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 30F);
+            this.AlumnosBtn.Location = new System.Drawing.Point(61, 504);
+            this.AlumnosBtn.Name = "AlumnosBtn";
+            this.AlumnosBtn.Size = new System.Drawing.Size(413, 116);
+            this.AlumnosBtn.TabIndex = 6;
+            this.AlumnosBtn.Text = "Alumnos";
+            this.AlumnosBtn.UseVisualStyleBackColor = true;
+            this.AlumnosBtn.Click += new System.EventHandler(this.AlumnosBtn_Click);
             // 
             // Menu
             // 
@@ -131,5 +145,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button ProductosBtn;
         private System.Windows.Forms.Button VentasBtn;
+        private System.Windows.Forms.Button AlumnosBtn;
     }
 }

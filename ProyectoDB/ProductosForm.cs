@@ -94,10 +94,11 @@ namespace ProyectoDB
 
         private void BackBtn_Click(object sender, EventArgs e)
         {
-            Menu menuForm = new Menu();
+            // Crear una instancia del formulario Menú
+            ListaProductosForm ListaproductosForm = new ListaProductosForm();
 
             // Mostrar el formulario Menú
-            menuForm.Show();
+            ListaproductosForm.Show();
 
             // Ocultar el formulario actual
             this.Hide();

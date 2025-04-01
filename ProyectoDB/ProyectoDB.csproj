@@ -160,12 +160,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgregarAlumno.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AgregarAlumno.Designer.cs">
+      <DependentUpon>AgregarAlumno.cs</DependentUpon>
+    </Compile>
     <Compile Include="DatabaseHelper.cs" />
     <Compile Include="Efectivo.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Efectivo.Designer.cs">
       <DependentUpon>Efectivo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ListaProductosForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListaProductosForm.Designer.cs">
+      <DependentUpon>ListaProductosForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ListaAlumnoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListaAlumnoForm.Designer.cs">
+      <DependentUpon>ListaAlumnoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Menu.cs">
       <SubType>Form</SubType>
@@ -178,6 +196,18 @@
     </Compile>
     <Compile Include="MetodoPagoForm.Designer.cs">
       <DependentUpon>MetodoPagoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modificar_Alumno.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modificar_Alumno.Designer.cs">
+      <DependentUpon>Modificar_Alumno.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Moidifcar_Producto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Moidifcar_Producto.Designer.cs">
+      <DependentUpon>Moidifcar_Producto.cs</DependentUpon>
     </Compile>
     <Compile Include="ProductosForm.cs">
       <SubType>Form</SubType>
@@ -199,14 +229,29 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AgregarAlumno.resx">
+      <DependentUpon>AgregarAlumno.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Efectivo.resx">
       <DependentUpon>Efectivo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListaProductosForm.resx">
+      <DependentUpon>ListaProductosForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListaAlumnoForm.resx">
+      <DependentUpon>ListaAlumnoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Menu.resx">
       <DependentUpon>Menu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MetodoPagoForm.resx">
       <DependentUpon>MetodoPagoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Modificar_Alumno.resx">
+      <DependentUpon>Modificar_Alumno.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Moidifcar_Producto.resx">
+      <DependentUpon>Moidifcar_Producto.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProductosForm.resx">
       <DependentUpon>ProductosForm.cs</DependentUpon>
