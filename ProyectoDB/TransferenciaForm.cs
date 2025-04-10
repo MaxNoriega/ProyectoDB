@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using System.IO;
+using System.Text;
 
 namespace ProyectoDB
 {
@@ -22,7 +24,7 @@ namespace ProyectoDB
         public TransferenciaForm()
         {
             InitializeComponent();
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
             this.Load += TransferenciaForm_Load; // Suscripción al evento Load
                                                  // Suscribir el evento KeyDown al TextBox PtsUsartxt
             PtsUsartxt.KeyDown += PtsUsartxt_KeyDown;
@@ -245,13 +247,8 @@ namespace ProyectoDB
                 string obtenerIdVentaQuery = "SELECT SCOPE_IDENTITY() AS ID_VENTA";
                 DataTable dtIdVenta = dbHelper.ExecuteQuery(obtenerIdVentaQuery);
 
-             
-
-               
-
                 // Registrar el pago en la tabla Pago
               
-
                 // Actualizar los puntos del cliente (misma lógica que en el pago en efectivo)
                 if (puntosUsados > 0)
                 {
@@ -281,11 +278,118 @@ namespace ProyectoDB
                     dbHelper.ExecuteNonQueryWithParameters(updatePuntosQuery, updatePuntosParameters);
                 }
 
+                foreach (var producto in ProductosVenta)
+                {
+                    // Calcular el subtotal (precio unitario * cantidad)
+                    decimal subtotal = producto.Precio * 1; // Asumiendo cantidad = 1
+
+                    string insertDetalleQuery = @"
+                INSERT INTO DetalleVenta
+                (ID_Venta, ID_Producto, Nombre, Cantidad, Precio_Unitario, Subtotal)
+                VALUES (@venta_id, @producto_id,@nombre, @cantidad, @precio_unitario, @subtotal)";
+
+                    SqlParameter[] detalleParameters = {
+                new SqlParameter("@venta_id", idVenta),
+                new SqlParameter("@producto_id", producto.IdProducto),
+                new SqlParameter("@nombre", producto.Nombre),
+                new SqlParameter("@cantidad", 1), // Asumiendo 1 unidad por producto
+                new SqlParameter("@precio_unitario", producto.Precio),
+                new SqlParameter("@subtotal", subtotal)
+            };
+
+                    dbHelper.ExecuteNonQueryWithParameters(insertDetalleQuery, detalleParameters);
+                }
+
+                GuardarTicketEnEscritorio();
+
+                // Limpiar la lista de productos después de registrar la venta
+                ProductosVenta.Clear();
+
                 MessageBox.Show("Pago con transferencia realizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al procesar el pago con transferencia: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private int ObtenerNuevoIdVenta()
+        {
+            string query = "SELECT ISNULL(MAX(ID_VENTA), 0) + 1 FROM Venta";
+            DataTable dt = dbHelper.ExecuteQuery(query);
+            return Convert.ToInt32(dt.Rows[0][0]);
+        }
+
+        private string GenerarTicket()
+        {
+            // Verificación crítica - ¿Tiene productos?
+            if (ProductosVenta == null || ProductosVenta.Count == 0)
+            {
+                return "ERROR: No hay productos en el ticket";
+            }
+
+            // Usar StringBuilder para mejor performance con muchos productos
+            StringBuilder ticketBuilder = new StringBuilder();
+
+            // Encabezado del ticket
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine($"No.Control: {IdCliente}");
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine("PRODUCTO".PadRight(25) + "PRECIO".PadLeft(10));
+            ticketBuilder.AppendLine("------------------------------------");
+
+            // Productos con formato mejorado
+            foreach (var producto in ProductosVenta)
+            {
+                ticketBuilder.AppendLine(
+                    $"{producto.Nombre.Trim().PadRight(25)} | " +
+                    $"{producto.Precio.ToString("C2").PadLeft(10)}"
+                );
+            }
+
+            // Convertir los textos a decimal y luego formatear como moneda
+            decimal total = decimal.Parse(txtCobro.Text);
+   
+
+            // Datos de pago con formato monetario
+            ticketBuilder.AppendLine("------------------------------------");
+            ticketBuilder.AppendLine($"TOTAL: {total.ToString("C2").PadLeft(35)}");
+            ticketBuilder.AppendLine($"MÉTODO: {"Efectivo".PadLeft(34)}");
+            ticketBuilder.AppendLine($"PUNTOS: {(string.IsNullOrWhiteSpace(PtsUsartxt.Text) ? "0" : PtsUsartxt.Text).PadLeft(33)}");
+            ticketBuilder.AppendLine("------------------------------------");
+            ticketBuilder.AppendLine($"FECHA: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss").PadLeft(34)}");
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine("¡GRACIAS POR SU COMPRA!");
+            ticketBuilder.AppendLine("====================================");
+
+            return ticketBuilder.ToString();
+        }
+
+        private void GuardarTicketEnEscritorio()
+        {
+            try
+            {
+                // Generar el ticket
+                string ticket = GenerarTicket();
+
+                // Obtener la ruta del escritorio
+                string rutaEscritorio = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+                // Definir el nombre del archivo
+                string nombreArchivo = $"Ticket_{IdCliente}_{DateTime.Now:yyyyMMddHHmmss}.txt";
+
+                // Ruta completa del archivo
+                string rutaArchivo = Path.Combine(rutaEscritorio, nombreArchivo);
+
+                // Guardar el ticket en un archivo de texto
+                File.WriteAllText(rutaArchivo, ticket);
+
+                // Informar al usuario
+                MessageBox.Show($"El ticket se ha guardado correctamente en:\n{rutaArchivo}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al guardar el ticket: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -302,13 +406,6 @@ namespace ProyectoDB
             }
 
             return Convert.ToInt32(dt.Rows[0]["ID_CUENTA"]);
-        }
-
-        private int ObtenerNuevoIdVenta()
-        {
-            string query = "SELECT ISNULL(MAX(ID_VENTA), 0) + 1 FROM Venta";
-            DataTable dt = dbHelper.ExecuteQuery(query);
-            return Convert.ToInt32(dt.Rows[0][0]);
         }
 
 

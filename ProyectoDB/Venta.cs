@@ -14,7 +14,7 @@ namespace ProyectoDB
             InitializeComponent();
             ListaProductos.KeyDown += ListaProductos_KeyDown;
             txtBuscarProdVenta.KeyDown += txtBuscarProdVenta_KeyDown;
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
         }
 
 
@@ -38,10 +38,6 @@ namespace ProyectoDB
                 e.SuppressKeyPress = true;
 
                 string idProducto = txtBuscarProdVenta.Text.Trim();
-
-             
-
-
                 try
                 {
                     AgregarProducto(idProducto);
@@ -82,7 +78,13 @@ namespace ProyectoDB
                     string updateQuery = "UPDATE Producto SET Stock = Stock - 1 WHERE Id_Producto = @IdProducto";
                     dbHelper.ExecuteNonQueryWithParameters(updateQuery, updateParameters);
 
-              
+                    // Agregar el producto a la lista para el ticket
+                    DatosVenta.ListaProdTicket.Add(new Productos
+                    {
+                        IdProducto = id,
+                        Nombre = nombre,
+                        Precio = precio
+                    });
 
                     ActualizarTotales(); //  Recalcula los totales
                     txtBuscarProdVenta.Clear(); //  Limpia el TextBox después de agregar el producto
@@ -91,10 +93,6 @@ namespace ProyectoDB
                 {
                     MessageBox.Show("El producto no tiene stock disponible.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
-            else
-            {
-                
             }
         }
 
@@ -259,7 +257,8 @@ namespace ProyectoDB
     {
         public string IdProducto { get; set; }
         public string Nombre { get; set; }
-        public decimal Precio { get; set; }
+        public decimal Precio { get; set; }  // Precio unitario
+       
     }
 
 

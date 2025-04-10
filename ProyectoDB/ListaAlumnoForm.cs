@@ -17,7 +17,7 @@ namespace ProyectoDB
         private readonly DatabaseHelper dbHelper;
         public ListaUsuariosForm()
         {
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
             InitializeComponent();
             CargarAlumnos();
         }
@@ -152,7 +152,7 @@ namespace ProyectoDB
 
         private void EliminarAlumno(int NumCtrl)
         {
-            using (SqlConnection conexion = new SqlConnection("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True"))
+            using (SqlConnection conexion = new SqlConnection("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True"))
             {
                 conexion.Open();
 

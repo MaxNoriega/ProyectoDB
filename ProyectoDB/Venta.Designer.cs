@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.txtBuscarProdVenta = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -39,12 +39,12 @@
             this.txtCostoTotal = new System.Windows.Forms.TextBox();
             this.txtPtosGenerados = new System.Windows.Forms.TextBox();
             this.ListaProductos = new System.Windows.Forms.DataGridView();
+            this.PagarBtn = new System.Windows.Forms.Button();
+            this.BackBtn = new System.Windows.Forms.Button();
             this.IdProducto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Nombre_Producto_Venta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Precio_Venta_Producto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PtosGen_Producto_Venta = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.PagarBtn = new System.Windows.Forms.Button();
-            this.BackBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ListaProductos)).BeginInit();
             this.SuspendLayout();
             // 
@@ -136,14 +136,14 @@
             // ListaProductos
             // 
             this.ListaProductos.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ListaProductos.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ListaProductos.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.ListaProductos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ListaProductos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.IdProducto,
@@ -153,18 +153,40 @@
             this.ListaProductos.Location = new System.Drawing.Point(146, 145);
             this.ListaProductos.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ListaProductos.Name = "ListaProductos";
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ListaProductos.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ListaProductos.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.ListaProductos.RowHeadersWidth = 62;
             this.ListaProductos.Size = new System.Drawing.Size(1696, 529);
             this.ListaProductos.TabIndex = 8;
             this.ListaProductos.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ListaProductos_KeyDown);
+            // 
+            // PagarBtn
+            // 
+            this.PagarBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F);
+            this.PagarBtn.Location = new System.Drawing.Point(839, 890);
+            this.PagarBtn.Name = "PagarBtn";
+            this.PagarBtn.Size = new System.Drawing.Size(334, 93);
+            this.PagarBtn.TabIndex = 9;
+            this.PagarBtn.Text = "Pagar";
+            this.PagarBtn.UseVisualStyleBackColor = true;
+            this.PagarBtn.Click += new System.EventHandler(this.PagarBtn_Click);
+            // 
+            // BackBtn
+            // 
+            this.BackBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
+            this.BackBtn.Location = new System.Drawing.Point(24, 22);
+            this.BackBtn.Name = "BackBtn";
+            this.BackBtn.Size = new System.Drawing.Size(201, 72);
+            this.BackBtn.TabIndex = 10;
+            this.BackBtn.Text = "Volver";
+            this.BackBtn.UseVisualStyleBackColor = true;
+            this.BackBtn.Click += new System.EventHandler(this.BackBtn_Click);
             // 
             // IdProducto
             // 
@@ -195,34 +217,12 @@
             this.PtosGen_Producto_Venta.MinimumWidth = 8;
             this.PtosGen_Producto_Venta.Name = "PtosGen_Producto_Venta";
             // 
-            // PagarBtn
-            // 
-            this.PagarBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F);
-            this.PagarBtn.Location = new System.Drawing.Point(839, 890);
-            this.PagarBtn.Name = "PagarBtn";
-            this.PagarBtn.Size = new System.Drawing.Size(334, 93);
-            this.PagarBtn.TabIndex = 9;
-            this.PagarBtn.Text = "Pagar";
-            this.PagarBtn.UseVisualStyleBackColor = true;
-            this.PagarBtn.Click += new System.EventHandler(this.PagarBtn_Click);
-            // 
-            // BackBtn
-            // 
-            this.BackBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
-            this.BackBtn.Location = new System.Drawing.Point(24, 22);
-            this.BackBtn.Name = "BackBtn";
-            this.BackBtn.Size = new System.Drawing.Size(201, 72);
-            this.BackBtn.TabIndex = 10;
-            this.BackBtn.Text = "Volver";
-            this.BackBtn.UseVisualStyleBackColor = true;
-            this.BackBtn.Click += new System.EventHandler(this.BackBtn_Click);
-            // 
             // Venta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Indigo;
-            this.ClientSize = new System.Drawing.Size(1928, 1009);
+            this.ClientSize = new System.Drawing.Size(1285, 672);
             this.Controls.Add(this.BackBtn);
             this.Controls.Add(this.PagarBtn);
             this.Controls.Add(this.ListaProductos);
@@ -254,12 +254,12 @@
         private System.Windows.Forms.TextBox txtCostoTotal;
         private System.Windows.Forms.TextBox txtPtosGenerados;
         private System.Windows.Forms.DataGridView ListaProductos;
+        private System.Windows.Forms.Button PagarBtn;
+        private System.Windows.Forms.Button BackBtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IdProducto;
         private System.Windows.Forms.DataGridViewTextBoxColumn Nombre_Producto_Venta;
         private System.Windows.Forms.DataGridViewTextBoxColumn Precio_Venta_Producto;
         private System.Windows.Forms.DataGridViewTextBoxColumn PtosGen_Producto_Venta;
-        private System.Windows.Forms.Button PagarBtn;
-        private System.Windows.Forms.Button BackBtn;
     }
 }
 

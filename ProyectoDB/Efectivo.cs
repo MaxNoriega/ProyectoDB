@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Data;
 using System.IO;
+using System.Text;
 
 namespace ProyectoDB
 {
@@ -24,7 +25,7 @@ namespace ProyectoDB
         public Efectivo()
         {
             InitializeComponent();
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
             this.Load += TransferenciaForm_Load; // Suscripción al evento Load
                                                  // Suscribir el evento KeyDown al TextBox PtsUsartxt
             PtsUsartxt.KeyDown += PtsUsartxt_KeyDown;
@@ -224,7 +225,7 @@ namespace ProyectoDB
                 if (!decimal.TryParse(txtCobro.Text.Trim(), out decimal totalVenta) || totalVenta < 0)
                 {
                     MessageBox.Show("El total de la venta no es válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return; // Salir de la función si el total no es válido
+                    return;
                 }
 
                 // Calcular los puntos generados por la venta (10% del total de la venta)
@@ -233,61 +234,75 @@ namespace ProyectoDB
                 // Actualizar los puntos en la base de datos
                 if (puntosUsados > 0)
                 {
-                    // Si se usaron puntos, restarlos del saldo del cliente
                     string updateQuery = "UPDATE Puntos SET Puntos = Puntos - @PuntosUsados WHERE NumCtrl = @NumCtrl";
                     SqlParameter[] parameters = {
                 new SqlParameter("@PuntosUsados", puntosUsados),
                 new SqlParameter("@NumCtrl", IdCliente)
             };
-
-                    // Usar DatabaseHelper para ejecutar la consulta
                     dbHelper.ExecuteNonQueryWithParameters(updateQuery, parameters);
-
                     MessageBox.Show("Puntos actualizados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    // Si no se usaron puntos, sumar los puntos generados por la venta al saldo del cliente
-                    // y también sumarlos a la columna Ptos_Generados
                     string updateQuery = @"
                 UPDATE Puntos 
                 SET Puntos = Puntos + @PuntosGenerados, 
                     Ptos_Generados = Ptos_Generados + @PuntosGenerados 
                 WHERE NumCtrl = @NumCtrl";
-
                     SqlParameter[] parameters = {
                 new SqlParameter("@PuntosGenerados", puntosGenerados),
                 new SqlParameter("@NumCtrl", IdCliente)
             };
-
-                    // Usar DatabaseHelper para ejecutar la consulta
                     dbHelper.ExecuteNonQueryWithParameters(updateQuery, parameters);
-
-                    MessageBox.Show("Puntos generados por la venta agregados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                   
                 }
 
                 // Generar una nueva venta y guardarla en la base de datos
+                int idVenta = ObtenerNuevoIdVenta();
+
                 string insertVentaQuery = @"
             INSERT INTO Venta (ID_VENTA, NumCtrl, Fecha_Venta, Total_Venta)
             VALUES (@ID_VENTA, @NumCtrl, @Fecha_Venta, @Total_Venta)";
 
-                // Obtener un ID_VENTA único (puedes usar un GUID o un número incremental)
-                int idVenta = ObtenerNuevoIdVenta(); // Implementa esta función para generar un ID único
-
                 SqlParameter[] ventaParameters = {
             new SqlParameter("@ID_VENTA", idVenta),
             new SqlParameter("@NumCtrl", IdCliente),
-            new SqlParameter("@Fecha_Venta", DateTime.Now), // Fecha actual
+            new SqlParameter("@Fecha_Venta", DateTime.Now),
             new SqlParameter("@Total_Venta", totalVenta)
         };
-
-                // Usar DatabaseHelper para ejecutar la consulta
                 dbHelper.ExecuteNonQueryWithParameters(insertVentaQuery, ventaParameters);
 
-                MessageBox.Show("Venta registrada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Registrar los productos vendidos en DetalleVenta
+                foreach (var producto in ProductosVenta)
+                {
+                    // Calcular el subtotal (precio unitario * cantidad)
+                    decimal subtotal = producto.Precio * 1; // Asumiendo cantidad = 1
 
-                // Guardar el ticket en el escritorio
-                // GuardarTicketEnEscritorio();
+                    string insertDetalleQuery = @"
+                INSERT INTO DetalleVenta 
+               (ID_Venta, ID_Producto, Nombre, Cantidad, Precio_Unitario, Subtotal)
+                VALUES (@venta_id, @producto_id,@nombre, @cantidad, @precio_unitario, @subtotal)";
+
+                    SqlParameter[] detalleParameters = {
+                new SqlParameter("@venta_id", idVenta),
+                new SqlParameter("@producto_id", producto.IdProducto),
+                new SqlParameter("@nombre", producto.Nombre),
+                new SqlParameter("@cantidad", 1), // Asumiendo 1 unidad por producto
+                new SqlParameter("@precio_unitario", producto.Precio),
+                new SqlParameter("@subtotal", subtotal)
+            };
+
+                    dbHelper.ExecuteNonQueryWithParameters(insertDetalleQuery, detalleParameters);
+                }
+
+                
+
+                GuardarTicketEnEscritorio();
+
+                // Limpiar la lista de productos después de registrar la venta
+                ProductosVenta.Clear();
+
+                
             }
             catch (Exception ex)
             {
@@ -305,68 +320,80 @@ namespace ProyectoDB
 
 
 
-        //private string GenerarTicket()
-        //{
-        //    // Encabezado del ticket
-        //    string Ticket = $"No.Control: {IdCliente}\n" +
-        //                    "Producto             |     Precio |     \n";
+        private string GenerarTicket()
+        {
+            // Verificación crítica - ¿Tiene productos?
+            if (ProductosVenta == null || ProductosVenta.Count == 0)
+            {
+                return "ERROR: No hay productos en el ticket";
+            }
 
-        //    // Concatenar la lista de productos formateada
-        //    foreach (var producto in ProductosVenta)
-        //    {
-        //        Ticket += $"{producto.Nombre,-20} | {producto.Precio,10:0.00} | \n";
-        //    }
+            // Usar StringBuilder para mejor performance con muchos productos
+            StringBuilder ticketBuilder = new StringBuilder();
 
-        //    // Método de Pago
-        //    string MetodoP = "Efectivo"; // Cambiar según el método usado, si es dinámico
+            // Encabezado del ticket
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine($"No.Control: {IdCliente}");
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine("PRODUCTO".PadRight(25) + "PRECIO".PadLeft(10));
+            ticketBuilder.AppendLine("------------------------------------");
 
-        //    // Datos de la venta
-        //    string Total = txtCobro.Text; // Total de la venta
-        //    string Dinero = txtPago.Text; // Cantidad de dinero con la que pagó el cliente
-        //    string Cambio = txtCambio.Text; // Cambio que se le dio al cliente
-        //    string Puntos = string.IsNullOrWhiteSpace(PtsUsartxt.Text) ? "0" : PtsUsartxt.Text; // Puntos utilizados o 0 si no se usaron
+            // Productos con formato mejorado
+            foreach (var producto in ProductosVenta)
+            {
+                ticketBuilder.AppendLine(
+                    $"{producto.Nombre.Trim().PadRight(25)} | " +
+                    $"{producto.Precio.ToString("C2").PadLeft(10)}"
+                );
+            }
 
-        //    // Fecha actual
-        //    string Fecha = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+            // Convertir los textos a decimal y luego formatear como moneda
+            decimal total = decimal.Parse(txtCobro.Text);
+            decimal recibido = decimal.Parse(txtPago.Text);
+            decimal cambio = decimal.Parse(txtCambio.Text);
 
-        //    // Agregar los detalles finales al ticket
-        //    Ticket +=
-        //              $"Total: {Total}\n" +
-        //              $"Metodo_Pago: {MetodoP}\n" +
-        //              $"Dinero: {Dinero}\n" +
-        //              $"Cambio: {Cambio}\n" +
-        //              $"Puntos: {Puntos}\n" +
-        //              $"Fecha: {Fecha}";
+            // Datos de pago con formato monetario
+            ticketBuilder.AppendLine("------------------------------------");
+            ticketBuilder.AppendLine($"TOTAL: {total.ToString("C2").PadLeft(35)}");
+            ticketBuilder.AppendLine($"MÉTODO: {"Efectivo".PadLeft(34)}");
+            ticketBuilder.AppendLine($"RECIBIDO: {recibido.ToString("C2").PadLeft(31)}");
+            ticketBuilder.AppendLine($"CAMBIO: {cambio.ToString("C2").PadLeft(33)}");
+            ticketBuilder.AppendLine($"PUNTOS: {(string.IsNullOrWhiteSpace(PtsUsartxt.Text) ? "0" : PtsUsartxt.Text).PadLeft(33)}");
+            ticketBuilder.AppendLine("------------------------------------");
+            ticketBuilder.AppendLine($"FECHA: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss").PadLeft(34)}");
+            ticketBuilder.AppendLine("====================================");
+            ticketBuilder.AppendLine("¡GRACIAS POR SU COMPRA!");
+            ticketBuilder.AppendLine("====================================");
 
-        //    return Ticket;
-        //}
+            return ticketBuilder.ToString();
+        }
 
-        //private void GuardarTicketEnEscritorio()
-        //{
-        //    try
-        //    {
-        //        // Generar el ticket
-        //        string ticket = GenerarTicket();
+        private void GuardarTicketEnEscritorio()
+        {
+            try
+            {
+                // Generar el ticket
+                string ticket = GenerarTicket();
 
-        //        // Obtener la ruta del escritorio
-        //        string rutaEscritorio = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                // Obtener la ruta del escritorio
+                string rutaEscritorio = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-        //        // Definir el nombre del archivo
-        //        string nombreArchivo = $"Ticket_{IdCliente}_{DateTime.Now:yyyyMMddHHmmss}.txt";
+                // Definir el nombre del archivo
+                string nombreArchivo = $"Ticket_{IdCliente}_{DateTime.Now:yyyyMMddHHmmss}.txt";
 
-        //        // Ruta completa del archivo
-        //        string rutaArchivo = Path.Combine(rutaEscritorio, nombreArchivo);
+                // Ruta completa del archivo
+                string rutaArchivo = Path.Combine(rutaEscritorio, nombreArchivo);
 
-        //        // Guardar el ticket en un archivo de texto
-        //        File.WriteAllText(rutaArchivo, ticket);
+                // Guardar el ticket en un archivo de texto
+                File.WriteAllText(rutaArchivo, ticket);
 
-        //        // Informar al usuario
-        //        MessageBox.Show($"El ticket se ha guardado correctamente en:\n{rutaArchivo}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Error al guardar el ticket: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //}
+                // Informar al usuario
+                MessageBox.Show($"El ticket se ha guardado correctamente en:\n{rutaArchivo}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al guardar el ticket: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

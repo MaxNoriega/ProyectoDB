@@ -18,7 +18,7 @@ namespace ProyectoDB
         public ListaProductosForm()
         {
             
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
             InitializeComponent();
             CargarProductos();
 
@@ -153,7 +153,7 @@ namespace ProyectoDB
         }
         private void EliminarProducto(int idProducto)
         {
-            using (SqlConnection conexion = new SqlConnection("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True"))
+            using (SqlConnection conexion = new SqlConnection("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True"))
             {
                 conexion.Open();
                 string query = "DELETE FROM Producto WHERE Id_Producto = @Id";

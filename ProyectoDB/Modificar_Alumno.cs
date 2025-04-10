@@ -22,7 +22,7 @@ namespace ProyectoDB
         public Alumno AlumnoActual { get; private set; }
         public Modificar_Alumno(Alumno alumno)
         {
-            dbHelper = new DatabaseHelper("Server=DESKTOP-0A6Q7FV;Database=PAPELERIA;Trusted_Connection=True");
+            dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
             InitializeComponent();
             AlumnoActual = alumno;
             CargarDatosAlumno();
