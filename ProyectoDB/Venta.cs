@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ProyectoDB
@@ -17,16 +18,10 @@ namespace ProyectoDB
             dbHelper = new DatabaseHelper("Server=DESKTOP-U8IQ7DR;Database=PAPELERIA;Trusted_Connection=True");
         }
 
-
-
         public static class DatosVenta
         {
             public static List<Productos> ListaProdTicket { get; set; } = new List<Productos>();
         }
-
-
-
-
 
         //Agregar Producto
         // Evento que se ejecuta cuando se presiona una tecla en el campo de búsqueda
@@ -52,7 +47,11 @@ namespace ProyectoDB
 
         private void AgregarProducto(string idProducto)
         {
-            // Consulta SQL para obtener el producto desde la base de datos
+            if (string.IsNullOrWhiteSpace(idProducto))
+            {
+                return;
+            }
+
             string query = "SELECT Id_Producto, Nombre, Precio, Stock FROM Producto WHERE Id_Producto = @IdProducto";
             SqlParameter[] selectParameters = { new SqlParameter("@IdProducto", idProducto) };
 
@@ -68,33 +67,82 @@ namespace ProyectoDB
 
                 if (stock > 0)
                 {
-                    decimal puntosGenerados = precio / 10; //  Calcula los puntos generados
+                    decimal puntosGenerados = precio / 10;
 
-                    // 🔹 Agregar el producto al DataGridView con solo los datos requeridos
-                    ListaProductos.Rows.Add(id, nombre, precio, puntosGenerados);
+                    bool productoExiste = false;
 
-                    // Crear un nuevo array de parámetros para la consulta UPDATE
+                    foreach (DataGridViewRow fila in ListaProductos.Rows)
+                    {
+                        if (fila.Cells["IdProducto"].Value != null)
+                        {
+                            string idFila = fila.Cells["IdProducto"].Value.ToString();
+
+                            if (idFila == id)
+                            {
+                                productoExiste = true;
+
+                                int cantidadActual = Convert.ToInt32(fila.Cells["Cantidad"].Value);
+                                cantidadActual += 1;
+                                fila.Cells["Cantidad"].Value = cantidadActual;
+
+                                // Actualizar el precio total
+                                fila.Cells["PrecioTotal"].Value = cantidadActual * precio;
+
+                                break;
+                            }
+                        }
+                    }
+
+
+                    if (!productoExiste)
+                    {
+                        int cantidadI = 1;
+                        decimal precioTotal = cantidadI * precio;
+
+                        // Agregar nueva fila en el DataGridView
+                        ListaProductos.Rows.Add(id, cantidadI, nombre, precio, puntosGenerados, precioTotal);
+
+                        // Agregar nuevo producto a la lista del ticket
+                        DatosVenta.ListaProdTicket.Add(new Productos
+                        {
+                            IdProducto = id,
+                            Cantidad = cantidadI,
+                            Nombre = nombre,
+                            Precio = precio,
+                            PrecioTotal = precioTotal
+                        });
+                    }
+                    else
+                    {
+                        // Si ya existe en el DataGridView, también actualizar la lista del ticket
+                        var productoEnTicket = DatosVenta.ListaProdTicket.FirstOrDefault(p => p.IdProducto == id);
+                        if (productoEnTicket != null)
+                        {
+                            productoEnTicket.Cantidad += 1;
+                            productoEnTicket.PrecioTotal = productoEnTicket.Cantidad * productoEnTicket.Precio;
+                        }
+                    }
+
+                    // Actualizar stock
                     SqlParameter[] updateParameters = { new SqlParameter("@IdProducto", idProducto) };
                     string updateQuery = "UPDATE Producto SET Stock = Stock - 1 WHERE Id_Producto = @IdProducto";
                     dbHelper.ExecuteNonQueryWithParameters(updateQuery, updateParameters);
 
-                    // Agregar el producto a la lista para el ticket
-                    DatosVenta.ListaProdTicket.Add(new Productos
-                    {
-                        IdProducto = id,
-                        Nombre = nombre,
-                        Precio = precio
-                    });
+                    ActualizarTotales();
+                    txtBuscarProdVenta.Clear();
 
-                    ActualizarTotales(); //  Recalcula los totales
-                    txtBuscarProdVenta.Clear(); //  Limpia el TextBox después de agregar el producto
                 }
                 else
                 {
                     MessageBox.Show("El producto no tiene stock disponible.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            else
+            {
+                MessageBox.Show("Producto no encontrado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
 
         // Método para actualizar los totales de la venta
         private void ActualizarTotales()
@@ -104,27 +152,22 @@ namespace ProyectoDB
 
             foreach (DataGridViewRow fila in ListaProductos.Rows)
             {
-                // Verifica si las celdas no están vacías antes de hacer cálculos
-                if (fila.Cells["Precio_Venta_Producto"].Value != null && decimal.TryParse(fila.Cells["Precio_Venta_Producto"].Value.ToString(), out decimal subtotal))
+                if (fila.Cells["Precio_Venta_Producto"].Value != null &&
+                    fila.Cells["Cantidad"].Value != null &&
+                    decimal.TryParse(fila.Cells["Precio_Venta_Producto"].Value.ToString(), out decimal precio) &&
+                    int.TryParse(fila.Cells["Cantidad"].Value.ToString(), out int cantidad))
                 {
-                    totalPrecio += subtotal;
-                }
-                if (fila.Cells["PtosGen_Producto_Venta"].Value != null && decimal.TryParse(fila.Cells["PtosGen_Producto_Venta"].Value.ToString(), out decimal puntos))
-                {
-                    totalPuntos += puntos;
+                    totalPrecio += precio * cantidad;
+                    totalPuntos += (precio / 10) * cantidad; // Puntos por cantidad
                 }
             }
 
-            // Actualiza los campos de total en la interfaz
             txtCostoTotal.Text = totalPrecio.ToString("0.00");
             txtPtosGenerados.Text = totalPuntos.ToString("0.00");
         }
 
 
-
-
-
-        //Eliminar Producto de la lista
+        // Eliminar Producto de la lista
         private void ListaProductos_KeyDown(object sender, KeyEventArgs e)
         {
             // Verifica si se presionó la tecla "Delete" o "Backspace"
@@ -133,35 +176,30 @@ namespace ProyectoDB
                 // Verifica si hay una fila seleccionada
                 if (ListaProductos.SelectedRows.Count > 0)
                 {
-                    // Obtiene el ID y nombre del producto de la fila seleccionada
-                    string idProducto = ListaProductos.SelectedRows[0].Cells[0].Value.ToString(); // Columna 0 = ID
+                    DataGridViewRow filaSeleccionada = ListaProductos.SelectedRows[0];
 
-                    //  Elimina la fila del DataGridView
-                    ListaProductos.Rows.RemoveAt(ListaProductos.SelectedRows[0].Index);
+                    // Obtiene el ID y la cantidad del producto de la fila seleccionada
+                    string idProducto = filaSeleccionada.Cells["IdProducto"].Value.ToString();
+                    int cantidad = Convert.ToInt32(filaSeleccionada.Cells["Cantidad"].Value);
 
-                    //  Reponer stock en la base de datos
-                    string updateQuery = "UPDATE Producto SET Stock = Stock + 1 WHERE Id_Producto = @IdProducto";
-                    SqlParameter[] parameters = { new SqlParameter("@IdProducto", idProducto) };
+                    // Elimina la fila del DataGridView
+                    ListaProductos.Rows.RemoveAt(filaSeleccionada.Index);
+
+                    // Reponer el stock en la base de datos, ahora usando la cantidad
+                    string updateQuery = "UPDATE Producto SET Stock = Stock + @Cantidad WHERE Id_Producto = @IdProducto";
+                    SqlParameter[] parameters =
+                    {
+                new SqlParameter("@Cantidad", cantidad),
+                new SqlParameter("@IdProducto", idProducto)
+            };
 
                     dbHelper.ExecuteNonQueryWithParameters(updateQuery, parameters);
 
-                    //  Actualiza los totales después de eliminar el producto
+                    // Actualiza los totales después de eliminar el producto
                     ActualizarTotales();
                 }
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
         //PAGAR
         private void PagarBtn_Click(object sender, EventArgs e)
@@ -199,12 +237,12 @@ namespace ProyectoDB
                 var metodoPagoForm = new MetodoPagoForm
                 {
                     IDVenta = idVenta,
-                    IdCliente = idCliente,          // Pasa el IdCliente al formulario
-                    TotalVenta = totalVenta,       // Pasa el total de la venta
-                    ProductosVenta = DatosVenta.ListaProdTicket, // Envía los productos
-                    PuntosGenerados = puntosGen   // Envía los puntos generados
+                    IdCliente = idCliente,          
+                    TotalVenta = totalVenta,       
+                    ProductosVenta = DatosVenta.ListaProdTicket, 
+                    PuntosGenerados = puntosGen   
                 };
-
+                this.Close();
                 metodoPagoForm.Show(); // Abre la ventana de método de pago
             }
             catch (Exception ex)
@@ -224,7 +262,7 @@ namespace ProyectoDB
                     MessageBox.Show("El valor de los puntos generados no es válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return 0;
                 }
-                return Convert.ToInt32(Math.Round(puntosGenerados)); // Redondea al entero más cercano
+                return Convert.ToInt32(Math.Round(puntosGenerados)); 
             }
             catch (Exception ex)
             {
@@ -256,9 +294,12 @@ namespace ProyectoDB
     public class Productos
     {
         public string IdProducto { get; set; }
+
+        public decimal Cantidad { get; set; } 
         public string Nombre { get; set; }
         public decimal Precio { get; set; }  // Precio unitario
-       
+        public decimal PrecioTotal { get; set; }  // Precio unitario
+
     }
 
 

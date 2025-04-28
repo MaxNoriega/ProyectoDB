@@ -281,7 +281,7 @@ namespace ProyectoDB
                 foreach (var producto in ProductosVenta)
                 {
                     // Calcular el subtotal (precio unitario * cantidad)
-                    decimal subtotal = producto.Precio * 1; // Asumiendo cantidad = 1
+                    decimal subtotal = producto.Precio * producto.Cantidad; 
 
                     string insertDetalleQuery = @"
                 INSERT INTO DetalleVenta
@@ -292,7 +292,7 @@ namespace ProyectoDB
                 new SqlParameter("@venta_id", idVenta),
                 new SqlParameter("@producto_id", producto.IdProducto),
                 new SqlParameter("@nombre", producto.Nombre),
-                new SqlParameter("@cantidad", 1), // Asumiendo 1 unidad por producto
+                new SqlParameter("@cantidad", producto.Cantidad), 
                 new SqlParameter("@precio_unitario", producto.Precio),
                 new SqlParameter("@subtotal", subtotal)
             };
@@ -306,6 +306,10 @@ namespace ProyectoDB
                 ProductosVenta.Clear();
 
                 MessageBox.Show("Pago con transferencia realizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+
+                Menu menu = new Menu();
+                menu.Show();
             }
             catch (Exception ex)
             {
@@ -335,21 +339,21 @@ namespace ProyectoDB
             ticketBuilder.AppendLine("====================================");
             ticketBuilder.AppendLine($"No.Control: {IdCliente}");
             ticketBuilder.AppendLine("====================================");
-            ticketBuilder.AppendLine("PRODUCTO".PadRight(25) + "PRECIO".PadLeft(10));
+            ticketBuilder.AppendLine("CANT  PRODUCTO                PRECIO");
             ticketBuilder.AppendLine("------------------------------------");
 
             // Productos con formato mejorado
             foreach (var producto in ProductosVenta)
             {
                 ticketBuilder.AppendLine(
-                    $"{producto.Nombre.Trim().PadRight(25)} | " +
-                    $"{producto.Precio.ToString("C2").PadLeft(10)}"
+                    $"{producto.Cantidad.ToString().PadRight(5)} " +
+                    $"{producto.Nombre.Trim().PadRight(22)} " +
+                    $"{producto.PrecioTotal.ToString("C2").PadLeft(10)}"
                 );
             }
 
             // Convertir los textos a decimal y luego formatear como moneda
             decimal total = decimal.Parse(txtCobro.Text);
-   
 
             // Datos de pago con formato monetario
             ticketBuilder.AppendLine("------------------------------------");

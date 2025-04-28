@@ -156,12 +156,19 @@ namespace ProyectoDB
             {
                 conexion.Open();
 
-                // Crear una transacción para garantizar que ambas eliminaciones se realicen correctamente
                 using (SqlTransaction transaccion = conexion.BeginTransaction())
                 {
                     try
                     {
-                        // Eliminar primero los registros en la tabla Puntos
+                        // 1. Eliminar registros en VENTAS (primero, por ser clave foránea)
+                        string queryVentas = "DELETE FROM Venta WHERE NumCtrl = @NumCtrl";
+                        using (SqlCommand comandoVentas = new SqlCommand(queryVentas, conexion, transaccion))
+                        {
+                            comandoVentas.Parameters.AddWithValue("@NumCtrl", NumCtrl);
+                            comandoVentas.ExecuteNonQuery();
+                        }
+
+                        // 2. Eliminar registros en PUNTOS
                         string queryPuntos = "DELETE FROM Puntos WHERE NumCtrl = @NumCtrl";
                         using (SqlCommand comandoPuntos = new SqlCommand(queryPuntos, conexion, transaccion))
                         {
@@ -169,7 +176,7 @@ namespace ProyectoDB
                             comandoPuntos.ExecuteNonQuery();
                         }
 
-                        // Luego, eliminar el alumno en la tabla Alumno
+                        // 3. Finalmente, eliminar al alumno
                         string queryAlumno = "DELETE FROM Alumno WHERE NumCtrl = @NumCtrl";
                         using (SqlCommand comandoAlumno = new SqlCommand(queryAlumno, conexion, transaccion))
                         {
@@ -177,12 +184,12 @@ namespace ProyectoDB
                             comandoAlumno.ExecuteNonQuery();
                         }
 
-                        // Confirmar la transacción
                         transaccion.Commit();
+                        MessageBox.Show("Alumno eliminado correctamente.", "Éxito",
+                                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
-                        // Si hay un error, revertir la transacción
                         transaccion.Rollback();
                         MessageBox.Show($"Error al eliminar alumno: {ex.Message}", "Error",
                                         MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -190,5 +197,8 @@ namespace ProyectoDB
                 }
             }
         }
+
+
+
     }
 }

@@ -30,6 +30,7 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.txtBuscarProdVenta = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -42,9 +43,11 @@
             this.PagarBtn = new System.Windows.Forms.Button();
             this.BackBtn = new System.Windows.Forms.Button();
             this.IdProducto = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Cantidad = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Nombre_Producto_Venta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Precio_Venta_Producto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PtosGen_Producto_Venta = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PrecioTotal = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.ListaProductos)).BeginInit();
             this.SuspendLayout();
             // 
@@ -135,10 +138,12 @@
             // 
             // ListaProductos
             // 
+            this.ListaProductos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
+            this.ListaProductos.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.ListaProductos.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -147,20 +152,30 @@
             this.ListaProductos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ListaProductos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.IdProducto,
+            this.Cantidad,
             this.Nombre_Producto_Venta,
             this.Precio_Venta_Producto,
-            this.PtosGen_Producto_Venta});
+            this.PtosGen_Producto_Venta,
+            this.PrecioTotal});
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 26F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ListaProductos.DefaultCellStyle = dataGridViewCellStyle2;
             this.ListaProductos.Location = new System.Drawing.Point(146, 145);
             this.ListaProductos.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ListaProductos.Name = "ListaProductos";
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.ListaProductos.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.ListaProductos.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.ListaProductos.RowHeadersWidth = 62;
             this.ListaProductos.Size = new System.Drawing.Size(1696, 529);
             this.ListaProductos.TabIndex = 8;
@@ -194,7 +209,14 @@
             this.IdProducto.MinimumWidth = 8;
             this.IdProducto.Name = "IdProducto";
             this.IdProducto.Visible = false;
-            this.IdProducto.Width = 150;
+            this.IdProducto.Width = 222;
+            // 
+            // Cantidad
+            // 
+            this.Cantidad.HeaderText = "Cantidad";
+            this.Cantidad.MinimumWidth = 8;
+            this.Cantidad.Name = "Cantidad";
+            this.Cantidad.Width = 215;
             // 
             // Nombre_Producto_Venta
             // 
@@ -216,13 +238,22 @@
             this.PtosGen_Producto_Venta.HeaderText = "Puntos Generados";
             this.PtosGen_Producto_Venta.MinimumWidth = 8;
             this.PtosGen_Producto_Venta.Name = "PtosGen_Producto_Venta";
+            this.PtosGen_Producto_Venta.Visible = false;
+            // 
+            // PrecioTotal
+            // 
+            this.PrecioTotal.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.PrecioTotal.HeaderText = "PrecioTotal";
+            this.PrecioTotal.MinimumWidth = 8;
+            this.PrecioTotal.Name = "PrecioTotal";
             // 
             // Venta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Indigo;
-            this.ClientSize = new System.Drawing.Size(1285, 672);
+            this.ClientSize = new System.Drawing.Size(1924, 1006);
             this.Controls.Add(this.BackBtn);
             this.Controls.Add(this.PagarBtn);
             this.Controls.Add(this.ListaProductos);
@@ -257,9 +288,11 @@
         private System.Windows.Forms.Button PagarBtn;
         private System.Windows.Forms.Button BackBtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IdProducto;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Cantidad;
         private System.Windows.Forms.DataGridViewTextBoxColumn Nombre_Producto_Venta;
         private System.Windows.Forms.DataGridViewTextBoxColumn Precio_Venta_Producto;
         private System.Windows.Forms.DataGridViewTextBoxColumn PtosGen_Producto_Venta;
+        private System.Windows.Forms.DataGridViewTextBoxColumn PrecioTotal;
     }
 }
 
